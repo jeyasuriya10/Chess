@@ -17,8 +17,6 @@ jobs:
       SLN_FILE: ${{ github.workspace }}/Chess.slnx
       PROJECT_FILE: ${{ github.workspace }}/src/Chess.UI/Chess.UI.csproj
       BUILD_OUTPUT_DIR: ${{ github.workspace }}/publish/INTERNAL/build
-      TEST_RESULTS_DIR: ${{ github.workspace }}/publish/INTERNAL/TestResults
-      TEST_RESULTS_FILE: test-results.trx
       ARTIFACT_NAME: build-output
 
     steps:
@@ -56,6 +54,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     needs: build
+
+    env:
+      TEST_RESULTS_DIR: ${{ github.workspace }}/publish/INTERNAL/TestResults
+      TEST_RESULTS_FILE: test-results.trx
 
     steps:
       - name: Checkout
