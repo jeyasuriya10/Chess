@@ -18,6 +18,8 @@ jobs:
       PROJECT_FILE: ${{ github.workspace }}/src/Chess.UI/Chess.UI.csproj
       BUILD_OUTPUT_DIR: ${{ github.workspace }}/publish/INTERNAL/build
       TEST_RESULTS_DIR: ${{ github.workspace }}/publish/INTERNAL/TestResults
+      TEST_RESULTS_FILE: test-results.trx
+      ARTIFACT_NAME: build-output
 
     steps:
       - name: Checkout
@@ -40,8 +42,9 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v6
         with:
-          name: build-output
-          path: $BUILD_OUTPUT_DIR
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.BUILD_OUTPUT_DIR }}
+          retention-days: 2
 
   test:
     runs-on: ubuntu-latest
@@ -59,17 +62,17 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v8
         with:
-          name: build-output
-          path: $BUILD_OUTPUT_DIR
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.BUILD_OUTPUT_DIR }}
 
       - name: Run tests
         run: |
           mkdir -p $TEST_RESULTS_DIR
-          dotnet test --no-build --configuration Release --logger "trx;LogFileName=test-results.trx" --results-directory $TEST_RESULTS_DIR
+          dotnet test --no-build --configuration Release --logger "trx;LogFileName=$TEST_RESULTS_FILE" --results-directory $TEST_RESULTS_DIR
         continue-on-error: true
 
       - name: Publish test results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: (!cancelled())
         with:
-          files: $TEST_RESULTS_DIR/test-results.trx
+          files: ${{ env.TEST_RESULTS_DIR }}/${{ env.TEST_RESULTS_FILE }}
