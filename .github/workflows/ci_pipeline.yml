@@ -13,6 +13,12 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      SLN_FILE: './Chess.slnx'
+      PROJECT_FILE: './src/Chess.UI/Chess.UI.csproj'
+      PUBLISH_DIR: 'publish/INTERNAL'
+      BUILD_OUTPUT_DIR: '$PUBLISH_DIR/build'
+      TEST_RESULTS_DIR: '$PUBLISH_DIR/TestResults'
 
     steps:
       - name: Checkout
@@ -24,19 +30,19 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore $SLN_FILE
 
       - name: Build solution
-        run: dotnet build --no-restore --configuration Release
+        run: dotnet build --no-restore --configuration Release $SLN_FILE
 
       - name: Publish build output
-        run: dotnet publish --no-build --configuration Release --property:PublishDir=build_output
+        run: dotnet publish --no-build --configuration Release --property:PublishDir=$BUILD_OUTPUT_DIR $PROJECT_FILE
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v6
         with:
           name: build-output
-          path: build_output
+          path: $BUILD_OUTPUT_DIR
 
   test:
     runs-on: ubuntu-latest
@@ -55,16 +61,16 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: build-output
-          path: build_output
+          path: $PUBLISH_DIR/build
 
       - name: Run tests
         run: |
-          mkdir -p TestResults
-          dotnet test --no-build --configuration Release --logger "trx;LogFileName=test-results.trx" --results-directory ./TestResults
+          mkdir -p $TEST_RESULTS_DIR
+          dotnet test --no-build --configuration Release --logger "trx;LogFileName=test-results.trx" --results-directory $TEST_RESULTS_DIR
         continue-on-error: true
 
       - name: Publish test results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: (!cancelled())
         with:
-          files: TestResults/test-results.trx
+          files: $TEST_RESULTS_DIR/test-results.trx
