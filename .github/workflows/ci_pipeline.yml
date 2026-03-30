@@ -14,11 +14,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      SLN_FILE: './Chess.slnx'
-      PROJECT_FILE: './src/Chess.UI/Chess.UI.csproj'
-      PUBLISH_DIR: 'publish/INTERNAL'
-      BUILD_OUTPUT_DIR: '$PUBLISH_DIR/build'
-      TEST_RESULTS_DIR: '$PUBLISH_DIR/TestResults'
+      SLN_FILE: ${{ github.workspace }}/Chess.slnx
+      PROJECT_FILE: ${{ github.workspace }}/src/Chess.UI/Chess.UI.csproj
+      BUILD_OUTPUT_DIR: ${{ github.workspace }}/publish/INTERNAL/build
+      TEST_RESULTS_DIR: ${{ github.workspace }}/publish/INTERNAL/TestResults
 
     steps:
       - name: Checkout
@@ -61,7 +60,7 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: build-output
-          path: $PUBLISH_DIR/build
+          path: $BUILD_OUTPUT_DIR
 
       - name: Run tests
         run: |
