@@ -31,13 +31,20 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore $SLN_FILE
+        run: |
+          echo "SLN_FILE=$SLN_FILE"
+          dotnet restore $SLN_FILE
 
       - name: Build solution
-        run: dotnet build --no-restore --configuration Release $SLN_FILE
+        run: |
+          echo "SLN_FILE=$SLN_FILE"
+          dotnet build --no-restore --configuration Release $SLN_FILE
 
       - name: Publish build output
-        run: dotnet publish --no-build --configuration Release --property:PublishDir=$BUILD_OUTPUT_DIR $PROJECT_FILE
+        run: |
+          echo "BUILD_OUTPUT_DIR=$BUILD_OUTPUT_DIR"
+          echo "PROJECT_FILE=$PROJECT_FILE"
+          dotnet publish --no-build --configuration Release --property:PublishDir=$BUILD_OUTPUT_DIR $PROJECT_FILE
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v6
@@ -66,10 +73,19 @@ jobs:
           path: ${{ env.BUILD_OUTPUT_DIR }}
 
       - name: Run tests
+        id: test_step
         run: |
-          mkdir -p $TEST_RESULTS_DIR
+          echo "TEST_RESULTS_DIR=$TEST_RESULTS_DIR"
+          echo "TEST_RESULTS_FILE=$TEST_RESULTS_FILE"
+          mkdir -p "$TEST_RESULTS_DIR"
           dotnet test --no-build --configuration Release --logger "trx;LogFileName=$TEST_RESULTS_FILE" --results-directory $TEST_RESULTS_DIR
         continue-on-error: true
+
+      - name: Fail if tests failed
+        if: steps.test_step.outcome == 'failure'
+        run: |
+          echo "Tests failed."
+          exit 1
 
       - name: Publish test results
         uses: EnricoMi/publish-unit-test-result-action@v2
