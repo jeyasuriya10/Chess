@@ -30,7 +30,7 @@ jobs:
         run: dotnet build --no-restore --configuration Release
 
       - name: Publish build output
-        run: dotnet publish --no-build --configuration Release -o build_output
+        run: dotnet publish --no-build --configuration Release --property:PublishDir=build_output
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v6
