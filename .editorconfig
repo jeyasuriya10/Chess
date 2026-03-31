@@ -173,6 +173,14 @@ dotnet_diagnostic.xUnit1051.severity = none
 # disable CA2025, the analyzer throws a NullReferenceException when processing this file: https://github.com/dotnet/roslyn-analyzers/issues/7652
 dotnet_diagnostic.CA2025.severity = none
 
+# disable CA1812, the analyzer throws this error for objects that would be instantiated by DI
+[src/Chess.UI/**/*.cs]
+dotnet_diagnostic.CA1812.severity = none
+
+[*.cs]
+# disable S125,the analyzer throws this error if any commented out code is available
+dotnet_diagnostic.S125.severity = none
+
 # C++ Files
 [*.{cpp,h,in}]
 curly_bracket_next_line = true
